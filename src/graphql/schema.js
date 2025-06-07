@@ -18,20 +18,21 @@ const typeDefs = gql`
     id: ID!
     nama: String!
     harga: Int!
+    stok: Int!
   }
 
   type Order {
     id: ID!
     userId: ID!
     tiketId: ID!
-    status: String!
+    jumlah: Int!
   }
 
   type Pembayaran {
     id: ID!
     orderId: ID!
-    jumlah: Int!
-    status: String!
+    status: String
+    metode: String
   }
 
   type Reward {
@@ -41,8 +42,6 @@ const typeDefs = gql`
   }
 
   type Query {
-    login(email: String!, password: String!): String
-
     users: [User]
     user(id: ID!): User
 
@@ -71,19 +70,17 @@ const typeDefs = gql`
     deleteUser(id: ID!): User
 
     # Tiket
-    createTiket(nama: String!, harga: Int!): Tiket
-    updateTiket(id: ID!, nama: String, harga: Int): Tiket
+    createTiket(nama: String!, harga: Int!, stok: Int!): Tiket
+    updateTiket(id: ID!, nama: String, harga: Int, stok: Int): Tiket
     deleteTiket(id: ID!): Tiket
 
     # Order
-    createOrder(userId: ID!, tiketId: ID!, status: String!): Order
-    updateOrder(id: ID!, userId: ID, tiketId: ID, status: String): Order
+    createOrder(userId: ID!, tiketId: ID!, jumlah: Int!): Order
+    updateOrder(id: ID!, userId: ID, tiketId: ID, jumlah: Int): Order
     deleteOrder(id: ID!): Order
 
     # Pembayaran
-    createPembayaran(orderId: ID!, jumlah: Int!, status: String!): Pembayaran
-    updatePembayaran(id: ID!, orderId: ID, jumlah: Int, status: String): Pembayaran
-    deletePembayaran(id: ID!): Pembayaran
+    createPembayaran(orderId: ID!): Pembayaran
 
     # Reward
     createReward(userId: ID!, poin: Int!): Reward
@@ -135,48 +132,47 @@ const resolvers = {
       const hashedPassword = await bcrypt.hash(password, 10);
       return prisma.user.create({ data: { username, email, password: hashedPassword } });
     },
-    updateUser: async (_, { id, username, email, password }) =>
-      prisma.user.update({ where: { id: Number(id) }, data: { username, email, password } }),
+    updateUser: async (_, { id, username, email, password }) => {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      return prisma.user.update({ where: { id: Number(id) }, data: { username, email, password: hashedPassword } });
+    },
     deleteUser: async (_, { id }) =>
       prisma.user.delete({ where: { id: Number(id) } }),
 
     // Tiket
-    createTiket: async (_, { nama, harga }) =>
-      prisma.tiket.create({ data: { nama, harga } }),
-    updateTiket: async (_, { id, nama, harga }) =>
-      prisma.tiket.update({ where: { id: Number(id) }, data: { nama, harga } }),
+    createTiket: async (_, { nama, harga, stok }) =>
+      prisma.tiket.create({ data: { nama, harga, stok } }),
+    updateTiket: async (_, { id, nama, harga, stok }) =>
+      prisma.tiket.update({ where: { id: Number(id) }, data: { nama, harga, stok } }),
     deleteTiket: async (_, { id }) =>
       prisma.tiket.delete({ where: { id: Number(id) } }),
 
     // Order
-    createOrder: async (_, { userId, tiketId, status }) =>
-      prisma.order.create({ data: { userId: Number(userId), tiketId: Number(tiketId), status } }),
-    updateOrder: async (_, { id, userId, tiketId, status }) =>
+    createOrder: async (_, { userId, tiketId, jumlah }) =>
+      prisma.order.create({ data: { userId: Number(userId), tiketId: Number(tiketId), jumlah: Number(jumlah) } }),
+    updateOrder: async (_, { id, userId, tiketId, jumlah }) =>
       prisma.order.update({
         where: { id: Number(id) },
         data: {
           userId: userId && Number(userId),
           tiketId: tiketId && Number(tiketId),
-          status,
+          jumlah: jumlah && Number(jumlah)
         },
       }),
     deleteOrder: async (_, { id }) =>
       prisma.order.delete({ where: { id: Number(id) } }),
 
     // Pembayaran
-    createPembayaran: async (_, { orderId, jumlah, status }) =>
-      prisma.pembayaran.create({ data: { orderId: Number(orderId), jumlah, status } }),
-    updatePembayaran: async (_, { id, orderId, jumlah, status }) =>
-      prisma.pembayaran.update({
-        where: { id: Number(id) },
+    createPembayaran: async (_, { orderId, status = "sukses", metode = "credit card" }) => {
+      const pembayaran = await prisma.pembayaran.create({
         data: {
-          orderId: orderId && Number(orderId),
-          jumlah,
+          orderId: Number(orderId),
           status,
+          metode,
         },
-      }),
-    deletePembayaran: async (_, { id }) =>
-      prisma.pembayaran.delete({ where: { id: Number(id) } }),
+      });
+      return pembayaran;
+    },
 
     // Reward
     createReward: async (_, { userId, poin }) =>
