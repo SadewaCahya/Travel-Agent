@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// User Service
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  orders    Order[]
+  rewards   Reward[]
+}
+
+// Tiket Service
+model Tiket {
+  id         Int     @id @default(autoincrement())
+  nama       String
+  harga      Int
+  stok       Int
+  orders     Order[]
+}
+
+// Order Service
+model Order {
+  id          Int        @id @default(autoincrement())
+  userId      Int
+  tiketId     Int
+  jumlah      Int
+  createdAt   DateTime   @default(now())
+  pembayaran  Pembayaran?
+  user        User       @relation(fields: [userId], references: [id])
+  tiket       Tiket      @relation(fields: [tiketId], references: [id])
+}
+
+// Pembayaran Service
+model Pembayaran {
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @unique
+  status    String
+  metode    String
+  order     Order    @relation(fields: [orderId], references: [id])
+}
+
+// Reward Service
+model Reward {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  poin      Int
+  user      User     @relation(fields: [userId], references: [id])
+}
