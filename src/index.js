@@ -4,7 +4,7 @@ const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Import controller untuk auth
 const { register, login } = require("./controllers/auth.js");
