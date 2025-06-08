@@ -51,6 +51,7 @@ model Pembayaran {
   orderId   Int      @unique
   status    String
   metode    String
+  total     Int
   order     Order    @relation(fields: [orderId], references: [id])
 }
 

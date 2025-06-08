@@ -26,9 +26,25 @@ exports.getOrderById = async (req, res) => {
 exports.createOrder = async (req, res) => {
   try {
     const { userId, tiketId, jumlah } = req.body
+
+    const tiket = await prisma.tiket.findUnique({ where: { id: tiketId } })
+    if (!tiket) {
+      return res.status(404).json({ error: 'Tiket not found' })
+    }
+
+    if (tiket.stok < jumlah) {
+      return res.status(400).json({ error: 'Stok tiket tidak cukup' })
+    }
+
     const order = await prisma.order.create({
       data: { userId, tiketId, jumlah }
     })
+
+    await prisma.tiket.update({
+      where: { id: tiketId },
+      data: { stok: tiket.stok - jumlah }
+    })
+
     res.status(201).json(order)
   } catch (err) {
     res.status(500).json({ error: err.message })
