@@ -195,7 +195,8 @@ Get all payments
     "id": 1,
     "orderId": 1,
     "status": "sukses",
-    "metode": "credit card"
+    "metode": "credit card",
+    "total": 600000
   }
 ]
 ```
@@ -208,7 +209,8 @@ Get payment by ID
     "id": 1,
     "orderId": 1,
     "status": "sukses",
-    "metode": "credit card"
+    "metode": "credit card",
+    "total": 600000
   }
 ]
 ```
@@ -218,27 +220,9 @@ Create new payment
 **Request:**
 ```json
 {
-  "orderId": 1,
-  "status": "sukses",
-  "metode": "credit card"
+  "orderId": 1
 }
 ```
-
-### **PUT** `/pembayaran/:id`  
-Update payment by ID  
-**Request:**
-```json
-{
-  "id": 1,
-  "orderId": 1,
-  "status": "sukses",
-  "metode": "QRIS"
-}
-```
-
-### **DELETE** `/pembayaran/:id`  
-Delete payment by ID
-
 ---
 
 ## 🎁 Reward Service
