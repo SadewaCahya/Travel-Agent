@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,5 +21,16 @@
     "jsonwebtoken": "^9.0.2",
     "prisma": "^6.9.0"
   },
-  "description": ""
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "description": "```\r http://localhost:4000/{resource}\r ```",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SadewaCahya/Travel-Agent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SadewaCahya/Travel-Agent/issues"
+  },
+  "homepage": "https://github.com/SadewaCahya/Travel-Agent#readme"
 }

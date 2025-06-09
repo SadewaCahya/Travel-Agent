@@ -39,8 +39,11 @@ model Order {
   userId      Int
   tiketId     Int
   jumlah      Int
+  status      String     @default("pending")
+  total       Int
   createdAt   DateTime   @default(now())
   pembayaran  Pembayaran?
+  reward      Reward?
   user        User       @relation(fields: [userId], references: [id])
   tiket       Tiket      @relation(fields: [tiketId], references: [id])
 }
@@ -49,7 +52,7 @@ model Order {
 model Pembayaran {
   id        Int      @id @default(autoincrement())
   orderId   Int      @unique
-  status    String
+  status    String   @default("pending")
   metode    String
   total     Int
   order     Order    @relation(fields: [orderId], references: [id])
@@ -59,6 +62,8 @@ model Pembayaran {
 model Reward {
   id        Int      @id @default(autoincrement())
   userId    Int
+  orderId   Int      @unique
   poin      Int
   user      User     @relation(fields: [userId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id])
 }

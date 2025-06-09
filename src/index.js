@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
+const path = require("path");
 const app = express();
 
 const PORT = process.env.PORT || 4000;
@@ -18,13 +19,16 @@ const rewardRoutes = require("./routes/rewardRoutes");
 
 app.use(express.json());
 
-const authMiddleware = require("./middleware/auth");
-const checkAdminMiddleware = require("./middleware/checkAdmin");
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, "public")));
+
+const { authMiddleware, checkAdminMiddleware } = require("./middleware/auth");
 
 // Auth endpoints
 app.post("/register", register); 
 app.post("/login", login);       
 
+// Protected routes
 app.use("/users", authMiddleware, checkAdminMiddleware, userRoutes);   
 app.use("/tikets", authMiddleware, tiketRoutes);                         
 app.use("/orders", authMiddleware, orderRoutes);                         
@@ -40,6 +44,7 @@ async function startApolloServer() {
   app.listen(PORT, () => {
     console.log(`Akses REST: http://localhost:${PORT}`);
     console.log(`GraphQL siap di: http://localhost:${PORT}${server.graphqlPath}`);
+    console.log(`UI tersedia di: http://localhost:${PORT}`);
   });
 }
 

@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enterprise Integrated System UI</title>
+  <style>
+    /* -----------------------------------------
+       CSS Variables and Reset
+    ----------------------------------------- */
+    :root {
+      --color-bg: #ffffff;
+      --color-text: #374151;
+      --color-text-muted: #6b7280;
+      --color-primary: #111827;
+      --color-primary-light: #374151;
+      --color-accent: #2563eb;
+      --color-accent-light: #3b82f6;
+      --border-radius: 0.75rem;
+      --shadow-light: 0 1px 4px rgba(0,0,0,0.1);
+      --transition-time: 0.3s;
+      --max-width: 1200px;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.5;
+      font-size: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      color: var(--color-accent);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--transition-time);
+    }
+    a:hover, a:focus {
+      color: var(--color-accent-light);
+      outline: none;
+    }
+    button {
+      font-family: inherit;
+      background: var(--color-accent);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 0.5em 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color var(--transition-time), transform var(--transition-time);
+      user-select: none;
+    }
+    button:hover, button:focus {
+      background: var(--color-accent-light);
+      outline: none;
+      transform: scale(1.05);
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    h1 {
+      font-size: 48px;
+    }
+    h2 {
+      font-size: 28px;
+      margin-bottom: 0.5em;
+    }
+    p {
+      color: var(--color-text-muted);
+      font-size: 18px;
+      margin-top: 0;
+    }
+    /* -----------------------------------------
+       Layout Containers
+    ----------------------------------------- */
+    .container {
+      max-width: var(--max-width);
+      margin-left: auto;
+      margin-right: auto;
+      padding: 1rem 2rem 3rem 2rem;
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--color-bg);
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-light);
+    }
+    nav {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      user-select: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .nav-link {
+      font-weight: 600;
+      color: var(--color-primary-light);
+      padding: 0.25em 0.5em;
+      border-radius: var(--border-radius);
+      transition: background-color var(--transition-time);
+      user-select: none;
+    }
+    .nav-link.active, .nav-link:hover, .nav-link:focus {
+      background-color: var(--color-accent-light);
+      color: white;
+      outline: none;
+      cursor: pointer;
+    }
+    main {
+      margin-top: 3rem;
+      flex-grow: 1;
+    }
+    section {
+      background: #f9fafb;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+    /* -----------------------------------------
+       Data Table and Cards
+    ----------------------------------------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      color: var(--color-text-muted);
+    }
+    thead {
+      background-color: #e5e7eb;
+      color: var(--color-primary);
+      text-align: left;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle;
+    }
+    tbody tr:hover {
+      background-color: #e0e7ff;
+    }
+    .card {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      margin-bottom: 1.5rem;
+      transition: box-shadow var(--transition-time);
+    }
+    .card:hover {
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+    }
+    /* -----------------------------------------
+       Forms
+    ----------------------------------------- */
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
+      align-items: flex-end;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--color-primary-light);
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    select {
+      font-size: 16px;
+      padding: 0.5em;
+      border-radius: var(--border-radius);
+      border: 1px solid #d1d5db;
+      width: 100%;
+      max-width: 250px;
+      transition: border-color var(--transition-time);
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--color-accent);
+      outline: none;
+    }
+    /* Responsive for small forms */
+    .form-group {
+      flex: 1 1 200px;
+      min-width: 180px;
+    }
+    /* Scroll container for tables */
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    /* Loading and error messages */
+    .message {
+      padding: 1rem;
+      color: var(--color-primary-light);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav role="navigation" aria-label="Primary">
+      <div class="logo" tabindex="0">Enterprise UI</div>
+      <div class="nav-links" role="tablist" aria-label="Main Sections">
+        <div class="nav-link active" role="tab" tabindex="0" data-tab="users">Users</div>
+        <div class="nav-link" role="tab" tabindex="-1" data-tab="tikets">Tikets</div>
+        <div class="nav-link" role="tab" tabindex="-1" data-tab="orders">Orders</div>
+        <div class="nav-link" role="tab" tabindex="-1" data-tab="pembayaran">Pembayaran</div>
+        <div class="nav-link" role="tab" tabindex="-1" data-tab="rewards">Rewards</div>
+      </div>
+    </nav>
+  </header>
+  <main class="container" role="main">
+    <!-- Dynamic content container -->
+    <section id="content" tabindex="0">
+      <h1>Loading...</h1>
+    </section>
+  </main>
+
+  <script>
+    // GraphQL endpoint relative URL
+    const GRAPHQL_ENDPOINT = '/graphql';
+
+    /**
+     * GraphQL query executor helper
+     * @param {string} query - GraphQL query string
+     * @param {object} variables - Variables for the query
+     * @returns {Promise<any>} result data
+     */
+    async function graphQLFetch(query, variables = {}) {
+      try {
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, variables }),
+        });
+        const result = await response.json();
+        if (result.errors) {
+          throw new Error(result.errors.map(e => e.message).join(', '));
+        }
+        return result.data;
+      } catch (error) {
+        console.error("GraphQL Fetch Error:", error);
+        throw error;
+      }
+    }
+
+    const contentEl = document.getElementById('content');
+    const tabs = document.querySelectorAll('.nav-link');
+    let currentTab = 'users';
+
+    // Utility to set active tab
+    function setActiveTab(tabKey) {
+      tabs.forEach(tab => {
+        const isActive = tab.dataset.tab === tabKey;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('tabindex', isActive ? '0' : '-1');
+        tab.setAttribute('aria-selected', isActive);
+      });
+    }
+
+    // Helper to sanitize HTML text
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Render Users section with list + create form
+    async function renderUsers() {
+      contentEl.innerHTML = '<h2>Users</h2><p>List of registered users.</p><div class="message">Loading users...</div>';
+
+      try {
+        const query = `
+          query {
+            users {
+              id
+              username
+              email
+            }
+          }
+        `;
+        const data = await graphQLFetch(query);
+        const users = data?.users || [];
+
+        let html = '<h2>Users</h2>';
+        if (!users.length) {
+          html += '<p>No users found.</p>';
+        } else {
+          html += `<div class="table-wrapper"><table aria-label="Users table"><thead><tr><th>ID</th><th>Username</th><th>Email</th></tr></thead><tbody>`;
+          users.forEach(({id, username, email}) => {
+            html += `<tr><td>${escapeHtml(id)}</td><td>${escapeHtml(username)}</td><td>${escapeHtml(email)}</td></tr>`;
+          });
+          html += `</tbody></table></div>`;
+        }
+
+        // Create form - createUser mutation
+        html += `
+          <h3>Create New User</h3>
+          <form id="userForm" aria-label="Create user form">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input id="username" name="username" type="text" required autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" required autocomplete="email" />
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input id="password" name="password" type="password" required autocomplete="new-password" minlength="6" />
+            </div>
+            <button type="submit">Create User</button>
+          </form>
+          <div id="userMessage" style="margin-top:1em;color:green;"></div>
+        `;
+
+        contentEl.innerHTML = html;
+
+        // Attach form submit handler
+        document.getElementById('userForm').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          const username = form.username.value.trim();
+          const email = form.email.value.trim();
+          const password = form.password.value;
+
+          if (!username || !email || !password) {
+            return alert('Please fill all fields');
+          }
+          const mutation = `
+            mutation($username: String!, $email: String!, $password: String!) {
+              createUser(username: $username, email: $email, password: $password) {
+                id
+                username
+                email
+              }
+            }
+          `;
+          try {
+            const result = await graphQLFetch(mutation, {username, email, password});
+            document.getElementById('userMessage').textContent = 'User created successfully: ' + result.createUser.username;
+            // Refresh user list after creation
+            renderUsers();
+          } catch (err) {
+            alert('Error creating user: ' + err.message);
+          }
+        };
+
+      } catch (error) {
+        contentEl.innerHTML = '<p class="message">Failed to load users: ' + error.message + '</p>';
+      }
+    }
+
+    // Render Tikets section with list + create form
+    async function renderTikets() {
+      contentEl.innerHTML = '<h2>Tikets</h2><p>Ticket inventory.</p><div class="message">Loading tikets...</div>';
+      try {
+        const query = `
+          query {
+            tikets {
+              id
+              nama
+              harga
+              stok
+            }
+          }
+        `;
+        const data = await graphQLFetch(query);
+        const tikets = data?.tikets || [];
+
+        let html = '<h2>Tikets</h2>';
+        if (!tikets.length) {
+          html += '<p>No tikets found.</p>';
+        } else {
+          html += `<div class="table-wrapper"><table aria-label="Tikets table"><thead><tr><th>ID</th><th>Nama</th><th>Harga</th><th>Stok</th></tr></thead><tbody>`;
+          tikets.forEach(({id, nama, harga, stok}) => {
+            html += `<tr>
+                       <td>${escapeHtml(id)}</td>
+                       <td>${escapeHtml(nama)}</td>
+                       <td>Rp ${escapeHtml(harga)}</td>
+                       <td>${escapeHtml(stok)}</td>
+                     </tr>`;
+          });
+          html += `</tbody></table></div>`;
+        }
+
+        html += `
+          <h3>Create New Tiket</h3>
+          <form id="tiketForm" aria-label="Create tiket form">
+            <div class="form-group">
+              <label for="nama">Nama Tiket</label>
+              <input id="nama" name="nama" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="harga">Harga</label>
+              <input id="harga" name="harga" type="number" min="0" required />
+            </div>
+            <div class="form-group">
+              <label for="stok">Stok</label>
+              <input id="stok" name="stok" type="number" min="0" required />
+            </div>
+            <button type="submit">Create Tiket</button>
+          </form>
+          <div id="tiketMessage" style="margin-top:1em;color:green;"></div>
+        `;
+
+        contentEl.innerHTML = html;
+
+        document.getElementById('tiketForm').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          const nama = form.nama.value.trim();
+          const harga = parseInt(form.harga.value, 10);
+          const stok = parseInt(form.stok.value, 10);
+          if (!nama || isNaN(harga) || isNaN(stok)) {
+            return alert('Please fill all fields correctly');
+          }
+          const mutation = `
+            mutation($nama: String!, $harga: Int!, $stok: Int!) {
+              createTiket(nama: $nama, harga: $harga, stok: $stok) {
+                id
+                nama
+              }
+            }
+          `;
+          try {
+            const result = await graphQLFetch(mutation, {nama, harga, stok});
+            document.getElementById('tiketMessage').textContent = 'Tiket created: ' + result.createTiket.nama;
+            renderTikets();
+          } catch (err) {
+            alert('Error creating tiket: ' + err.message);
+          }
+        };
+
+      } catch (error) {
+        contentEl.innerHTML = '<p class="message">Failed to load tikets: ' + error.message + '</p>';
+      }
+    }
+
+    // Render Orders list & create form
+    async function renderOrders() {
+      contentEl.innerHTML = '<h2>Orders</h2><p>Orders placed by users for tikets.</p><div class="message">Loading orders...</div>';
+      try {
+        const query = `
+          query {
+            orders {
+              id
+              userId
+              tiketId
+              jumlah
+            }
+            users {
+              id
+              username
+            }
+            tikets {
+              id
+              nama
+            }
+          }
+        `;
+        const data = await graphQLFetch(query);
+        const orders = data.orders || [];
+        const usersMap = {};
+        (data.users || []).forEach(u => { usersMap[u.id] = u.username; });
+        const tiketsMap = {};
+        (data.tikets || []).forEach(t => { tiketsMap[t.id] = t.nama; });
+
+        let html = '<h2>Orders</h2>';
+        if (!orders.length) {
+          html += '<p>No orders found.</p>';
+        } else {
+          html += `<div class="table-wrapper"><table aria-label="Orders table"><thead><tr><th>ID</th><th>User</th><th>Tiket</th><th>Jumlah</th></tr></thead><tbody>`;
+          orders.forEach(({id, userId, tiketId, jumlah}) => {
+            html += `<tr>
+              <td>${escapeHtml(id)}</td>
+              <td>${escapeHtml(usersMap[userId] || userId)}</td>
+              <td>${escapeHtml(tiketsMap[tiketId] || tiketId)}</td>
+              <td>${escapeHtml(jumlah)}</td>
+            </tr>`;
+          });
+          html += `</tbody></table></div>`;
+        }
+
+        html += `
+          <h3>Create New Order</h3>
+          <form id="orderForm" aria-label="Create order form">
+            <div class="form-group">
+              <label for="userId">User</label>
+              <select id="userId" name="userId" required>
+                <option value="">-- Select User --</option>
+                ${(data.users || []).map(u => `<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tiketId">Tiket</label>
+              <select id="tiketId" name="tiketId" required>
+                <option value="">-- Select Tiket --</option>
+                ${(data.tikets || []).map(t => `<option value="${t.id}">${escapeHtml(t.nama)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="jumlah">Jumlah</label>
+              <input id="jumlah" name="jumlah" type="number" min="1" required />
+            </div>
+            <button type="submit">Create Order</button>
+          </form>
+          <div id="orderMessage" style="margin-top:1em;color:green;"></div>
+        `;
+
+        contentEl.innerHTML = html;
+
+        document.getElementById('orderForm').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          const userId = form.userId.value;
+          const tiketId = form.tiketId.value;
+          const jumlah = parseInt(form.jumlah.value, 10);
+          if (!userId || !tiketId || isNaN(jumlah) || jumlah < 1) {
+            return alert('Please fill all fields correctly');
+          }
+          const mutation = `
+            mutation($userId: ID!, $tiketId: ID!, $jumlah: Int!) {
+              createOrder(userId: $userId, tiketId: $tiketId, jumlah: $jumlah) {
+                id
+              }
+            }
+          `;
+          try {
+            const result = await graphQLFetch(mutation, {userId, tiketId, jumlah});
+            document.getElementById('orderMessage').textContent = 'Order created successfully. ID: ' + result.createOrder.id;
+            renderOrders();
+          } catch (err) {
+            alert('Error creating order: ' + err.message);
+          }
+        };
+      } catch (error) {
+        contentEl.innerHTML = '<p class="message">Failed to load orders: ' + error.message + '</p>';
+      }
+    }
+
+    // Render Pembayaran list & create form
+    async function renderPembayaran() {
+      contentEl.innerHTML = '<h2>Pembayaran</h2><p>Payments for orders.</p><div class="message">Loading pembayaran...</div>';
+      try {
+        const query = `
+          query {
+            pembayarans {
+              id
+              orderId
+              status
+              metode
+              total
+            }
+            orders {
+              id
+            }
+          }
+        `;
+        const data = await graphQLFetch(query);
+        const pembayarans = data.pembayarans || [];
+
+        let html = '<h2>Pembayaran</h2>';
+        if (!pembayarans.length) {
+          html += '<p>No pembayaran found.</p>';
+        } else {
+          html += `<div class="table-wrapper"><table aria-label="Pembayaran table"><thead><tr><th>ID</th><th>Order ID</th><th>Status</th><th>Metode</th><th>Total</th></tr></thead><tbody>`;
+          pembayarans.forEach(({id, orderId, status, metode, total}) => {
+            html += `<tr>
+              <td>${escapeHtml(id)}</td>
+              <td>${escapeHtml(orderId)}</td>
+              <td>${escapeHtml(status || '')}</td>
+              <td>${escapeHtml(metode || '')}</td>
+              <td>Rp ${escapeHtml(total || 0)}</td>
+            </tr>`;
+          });
+          html += `</tbody></table></div>`;
+        }
+
+        html += `
+          <h3>Create New Pembayaran</h3>
+          <form id="pembayaranForm" aria-label="Create pembayaran form">
+            <div class="form-group">
+              <label for="orderId">Order ID</label>
+              <select id="orderId" name="orderId" required>
+                <option value="">-- Select Order --</option>
+                ${(data.orders || []).map(o => `<option value="${o.id}">${escapeHtml(o.id)}</option>`).join('')}
+              </select>
+            </div>
+            <button type="submit">Create Pembayaran</button>
+          </form>
+          <div id="pembayaranMessage" style="margin-top:1em;color:green;"></div>
+        `;
+
+        contentEl.innerHTML = html;
+
+        document.getElementById('pembayaranForm').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          const orderId = form.orderId.value;
+          if (!orderId) {
+            return alert('Please select an order.');
+          }
+          const mutation = `
+            mutation($orderId: ID!) {
+              createPembayaran(orderId: $orderId) {
+                id
+                status
+                metode
+                total
+              }
+            }
+          `;
+          try {
+            const result = await graphQLFetch(mutation, {orderId});
+            document.getElementById('pembayaranMessage').textContent = 'Pembayaran created: ID ' + result.createPembayaran.id;
+            renderPembayaran();
+          } catch (err) {
+            alert('Error creating pembayaran: ' + err.message);
+          }
+        };
+
+      } catch (error) {
+        contentEl.innerHTML = '<p class="message">Failed to load pembayaran: ' + error.message + '</p>';
+      }
+    }
+
+    // Render Rewards list + create form
+    async function renderRewards() {
+      contentEl.innerHTML = '<h2>Rewards</h2><p>User reward points.</p><div class="message">Loading rewards...</div>';
+      try {
+        const query = `
+          query {
+            rewards {
+              id
+              userId
+              orderId
+              poin
+            }
+            users {
+              id
+              username
+            }
+            orders {
+              id
+            }
+          }
+        `;
+        const data = await graphQLFetch(query);
+        const rewards = data.rewards || [];
+        const usersMap = {};
+        (data.users || []).forEach(u => { usersMap[u.id] = u.username; });
+        const ordersMap = {};
+        (data.orders || []).forEach(o => { ordersMap[o.id] = o.id; });
+
+        let html = '<h2>Rewards</h2>';
+        if (!rewards.length) {
+          html += '<p>No rewards found.</p>';
+        } else {
+          html += `<div class="table-wrapper"><table aria-label="Rewards table"><thead><tr><th>ID</th><th>User</th><th>Order ID</th><th>Poin</th></tr></thead><tbody>`;
+          rewards.forEach(({id, userId, orderId, poin}) => {
+            html += `<tr>
+              <td>${escapeHtml(id)}</td>
+              <td>${escapeHtml(usersMap[userId] || userId)}</td>
+              <td>${escapeHtml(ordersMap[orderId] || orderId)}</td>
+              <td>${escapeHtml(poin)}</td>
+            </tr>`;
+          });
+          html += `</tbody></table></div>`;
+        }
+
+        html += `
+          <h3>Create New Reward</h3>
+          <form id="rewardForm" aria-label="Create reward form">
+            <div class="form-group">
+              <label for="userId">User</label>
+              <select id="userId" name="userId" required>
+                <option value="">-- Select User --</option>
+                ${(data.users || []).map(u => `<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="orderId">Order ID</label>
+              <select id="orderId" name="orderId" required>
+                <option value="">-- Select Order --</option>
+                ${(data.orders || []).map(o => `<option value="${o.id}">${escapeHtml(o.id)}</option>`).join('')}
+              </select>
+            </div>
+            <button type="submit">Create Reward</button>
+          </form>
+          <div id="rewardMessage" style="margin-top:1em;color:green;"></div>
+        `;
+
+        contentEl.innerHTML = html;
+
+        document.getElementById('rewardForm').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          const userId = form.userId.value;
+          const orderId = form.orderId.value;
+          if (!userId || !orderId) {
+            return alert('Please fill all fields correctly');
+          }
+          const mutation = `
+            mutation($userId: ID!, $orderId: ID!) {
+              createReward(userId: $userId, orderId: $orderId) {
+                id
+              }
+            }
+          `;
+          try {
+            const result = await graphQLFetch(mutation, {userId, orderId});
+            document.getElementById('rewardMessage').textContent = 'Reward created. ID: ' + result.createReward.id;
+            renderRewards();
+          } catch (err) {
+            alert('Error creating reward: ' + err.message);
+          }
+        };
+
+      } catch (error) {
+        contentEl.innerHTML = '<p class="message">Failed to load rewards: ' + error.message + '</p>';
+      }
+    }
+
+    // Tab click event handler
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabKey = tab.dataset.tab;
+        if (tabKey !== currentTab) {
+          currentTab = tabKey;
+          setActiveTab(tabKey);
+          loadTabContent(tabKey);
+        }
+      });
+      tab.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          tab.click();
+        }
+      });
+    });
+
+    // Content loader dispatcher
+    function loadTabContent(tabKey) {
+      switch(tabKey) {
+        case 'users': return renderUsers();
+        case 'tikets': return renderTikets();
+        case 'orders': return renderOrders();
+        case 'pembayaran': return renderPembayaran();
+        case 'rewards': return renderRewards();
+        default:
+          contentEl.innerHTML = '<p>Error: Unknown tab</p>';
+      }
+    }
+
+    // Initial load
+    setActiveTab(currentTab);
+    loadTabContent(currentTab);
+  </script>
+</body>
+</html> 

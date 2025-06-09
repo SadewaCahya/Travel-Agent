@@ -26,19 +26,22 @@ const typeDefs = gql`
     userId: ID!
     tiketId: ID!
     jumlah: Int!
+    status: String!
+    total: Int!
   }
 
   type Pembayaran {
     id: ID!
     orderId: ID!
-    status: String
-    metode: String
-    total: Int
+    status: String!
+    metode: String!
+    total: Int!
   }
 
   type Reward {
     id: ID!
     userId: ID!
+    orderId: ID!
     poin: Int!
   }
 
@@ -77,15 +80,15 @@ const typeDefs = gql`
 
     # Order
     createOrder(userId: ID!, tiketId: ID!, jumlah: Int!): Order
-    updateOrder(id: ID!, userId: ID, tiketId: ID, jumlah: Int): Order
+    updateOrder(id: ID!, userId: ID, tiketId: ID, jumlah: Int, status: String, total: Int): Order
     deleteOrder(id: ID!): Order
 
     # Pembayaran
     createPembayaran(orderId: ID!): Pembayaran
 
     # Reward
-    createReward(userId: ID!, poin: Int!): Reward
-    updateReward(id: ID!, userId: ID, poin: Int): Reward
+    createReward(userId: ID!, orderId: ID!): Reward
+    updateReward(id: ID!, userId: ID, orderId: ID, poin: Int): Reward
     deleteReward(id: ID!): Reward
   }
 `;
@@ -159,11 +162,15 @@ const resolvers = {
         throw new Error('Stok tiket tidak cukup');
       }
 
+      const total = tiket.harga * jumlah;
+
       const order = await prisma.order.create({
         data: {
           userId: Number(userId),
           tiketId: Number(tiketId),
           jumlah: Number(jumlah),
+          total: total,
+          status: "pending"
         }
       });
 
@@ -174,7 +181,7 @@ const resolvers = {
 
       return order;
     },
-    updateOrder: async (_, { id, userId, tiketId, jumlah }) => {
+    updateOrder: async (_, { id, userId, tiketId, jumlah, status, total }) => {
       return await prisma.$transaction(async (tx) => {
         const orderLama = await tx.order.findUnique({ where: { id: Number(id) } });
         if (!orderLama) throw new Error('Order not found');
@@ -206,59 +213,85 @@ const resolvers = {
           } else if (selisih < 0) {
             await tx.tiket.update({
               where: { id: usedTiketId },
-              data: { stok: { increment: Math.abs(selisih) } },
+              data: { stok: { increment: -selisih } },
             });
           }
         }
 
+        const updateData = {};
+        if (userId) updateData.userId = Number(userId);
+        if (tiketId) updateData.tiketId = Number(tiketId);
+        if (jumlah) updateData.jumlah = Number(jumlah);
+        if (status) updateData.status = status;
+        if (total) updateData.total = Number(total);
+
         return tx.order.update({
           where: { id: Number(id) },
-          data: {
-            userId: userId && Number(userId),
-            tiketId: tiketId && Number(tiketId),
-            jumlah: jumlah && Number(jumlah),
-          },
+          data: updateData,
         });
       });
     },
-    deleteOrder: async (_, { id }) =>
-      prisma.order.delete({ where: { id: Number(id) } }),
+    deleteOrder: async (_, { id }) => {
+      return await prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({ where: { id: Number(id) } });
+        if (!order) throw new Error('Order not found');
+
+        await tx.tiket.update({
+          where: { id: order.tiketId },
+          data: { stok: { increment: order.jumlah } },
+        });
+
+        await tx.pembayaran.deleteMany({ where: { orderId: Number(id) } });
+        await tx.reward.deleteMany({ where: { orderId: Number(id) } });
+
+        return tx.order.delete({ where: { id: Number(id) } });
+      });
+    },
 
     // Pembayaran
-    createPembayaran: async (_, { orderId, status = "sukses", metode = "credit card" }) => {
-      const order = await prisma.order.findUnique({
-        where: { id: Number(orderId) },
-        include: { tiket: true },
-      });
-      if (!order) throw new Error('Order not found');
+    createPembayaran: async (_, { orderId }) => {
+      const order = await prisma.order.findUnique({ where: { id: Number(orderId) } });
+      if (!order) {
+        throw new Error("Order not found");
+      }
 
-      const total = order.tiket.harga * order.jumlah;
+      const existingPembayaran = await prisma.pembayaran.findUnique({ where: { orderId: Number(orderId) } });
+      if (existingPembayaran) {
+        throw new Error("Pembayaran untuk order ini sudah ada.");
+      }
 
       const pembayaran = await prisma.pembayaran.create({
         data: {
           orderId: Number(orderId),
-          status,
-          metode,
-          total,
-        },
+          status: "paid",
+          metode: "transfer",
+          total: order.total
+        }
       });
       return pembayaran;
     },
 
     // Reward
-    createReward: async (_, { userId, poin }) =>
-      prisma.reward.create({ data: { userId: Number(userId), poin } }),
-    updateReward: async (_, { id, userId, poin }) =>
-      prisma.reward.update({
-        where: { id: Number(id) },
-        data: {
-          userId: userId && Number(userId),
-          poin,
-        },
-      }),
+    createReward: async (_, { userId, orderId }) => {
+      const user = await prisma.user.findUnique({ where: { id: Number(userId) } });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const order = await prisma.order.findUnique({ where: { id: Number(orderId) } });
+      if (!order) {
+        throw new Error("Order not found");
+      }
+
+      // Calculate points (e.g., 10% of order total)
+      const poin = Math.floor(order.total * 0.1); // You can adjust the calculation as needed
+
+      return prisma.reward.create({ data: { userId: Number(userId), orderId: Number(orderId), poin } });
+    },
+    updateReward: async (_, { id, userId, orderId, poin }) =>
+      prisma.reward.update({ where: { id: Number(id) }, data: { userId: Number(userId), orderId: Number(orderId), poin: Number(poin) } }),
     deleteReward: async (_, { id }) =>
       prisma.reward.delete({ where: { id: Number(id) } }),
-  }
+  },
 };
 
 module.exports = { typeDefs, resolvers };
