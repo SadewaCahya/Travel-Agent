@@ -12,6 +12,7 @@ const typeDefs = gql`
     username: String!
     email: String!
     password: String!
+    role: String!
   }
 
   type Tiket {
@@ -69,8 +70,8 @@ const typeDefs = gql`
     login(email: String!, password: String!): String
 
     # User
-    createUser(username: String!, email: String!, password: String!): User
-    updateUser(id: ID!, username: String, email: String, password: String): User
+    createUser(username: String!, email: String!, password: String!, role: String!): User
+    updateUser(id: ID!, username: String, email: String, password: String, role: String): User
     deleteUser(id: ID!): User
 
     # Tiket
@@ -80,7 +81,7 @@ const typeDefs = gql`
 
     # Order
     createOrder(userId: ID!, tiketId: ID!, jumlah: Int!): Order
-    updateOrder(id: ID!, userId: ID, tiketId: ID, jumlah: Int, status: String, total: Int): Order
+    updateOrder(id: ID!, userId: ID, tiketId: ID, jumlah: Int): Order
     deleteOrder(id: ID!): Order
 
     # Pembayaran
@@ -88,7 +89,7 @@ const typeDefs = gql`
 
     # Reward
     createReward(userId: ID!, orderId: ID!): Reward
-    updateReward(id: ID!, userId: ID, orderId: ID, poin: Int): Reward
+    updateReward(id: ID!, userId: ID, orderId: ID): Reward
     deleteReward(id: ID!): Reward
   }
 `;
@@ -132,13 +133,23 @@ const resolvers = {
     },
 
     // User
-    createUser: async (_, { username, email, password }) => {
+    createUser: async (_, { username, email, password, role }) => {
       const hashedPassword = await bcrypt.hash(password, 10);
-      return prisma.user.create({ data: { username, email, password: hashedPassword } });
+      return prisma.user.create({ data: { username, email, password: hashedPassword, role } });
     },
-    updateUser: async (_, { id, username, email, password }) => {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      return prisma.user.update({ where: { id: Number(id) }, data: { username, email, password: hashedPassword } });
+    updateUser: async (_, { id, username, email, password, role }) => {
+      const data = {};
+      if (username !== undefined) data.username = username;
+      if (email !== undefined) data.email = email;
+      if (role !== undefined) data.role = role;
+      if (password) {
+        data.password = await bcrypt.hash(password, 10);
+      }
+
+      return prisma.user.update({
+        where: { id: Number(id) },
+        data
+      });
     },
     deleteUser: async (_, { id }) =>
       prisma.user.delete({ where: { id: Number(id) } }),
@@ -181,49 +192,57 @@ const resolvers = {
 
       return order;
     },
-    updateOrder: async (_, { id, userId, tiketId, jumlah, status, total }) => {
+    updateOrder: async (_, { id, userId, tiketId, jumlah, status }) => {
       return await prisma.$transaction(async (tx) => {
         const orderLama = await tx.order.findUnique({ where: { id: Number(id) } });
         if (!orderLama) throw new Error('Order not found');
 
-        const usedTiketId = tiketId ? Number(tiketId) : orderLama.tiketId;
-        const usedJumlah = jumlah ? Number(jumlah) : orderLama.jumlah;
+        const tiketLamaId = orderLama.tiketId;
+        const jumlahLama = orderLama.jumlah;
 
-        if (usedTiketId !== orderLama.tiketId) {
+        const tiketBaruId = tiketId !== undefined ? Number(tiketId) : tiketLamaId;
+        const jumlahBaru = jumlah !== undefined ? Number(jumlah) : jumlahLama;
+
+        // Update stok tiket
+        if (tiketBaruId !== tiketLamaId) {
           await tx.tiket.update({
-            where: { id: orderLama.tiketId },
-            data: { stok: { increment: orderLama.jumlah } },
+            where: { id: tiketLamaId },
+            data: { stok: { increment: jumlahLama } },
           });
-          const tiketBaru = await tx.tiket.findUnique({ where: { id: usedTiketId } });
+          const tiketBaru = await tx.tiket.findUnique({ where: { id: tiketBaruId } });
           if (!tiketBaru) throw new Error('Tiket baru tidak ditemukan');
-          if (tiketBaru.stok < usedJumlah) throw new Error('Stok tiket tidak cukup');
+          if (tiketBaru.stok < jumlahBaru) throw new Error('Stok tiket tidak cukup');
           await tx.tiket.update({
-            where: { id: usedTiketId },
-            data: { stok: { decrement: usedJumlah } },
+            where: { id: tiketBaruId },
+            data: { stok: { decrement: jumlahBaru } },
           });
-        } else {
-          const selisih = usedJumlah - orderLama.jumlah;
+        } else if (jumlahBaru !== jumlahLama) {
+          const selisih = jumlahBaru - jumlahLama;
           if (selisih > 0) {
-            const tiket = await tx.tiket.findUnique({ where: { id: usedTiketId } });
+            const tiket = await tx.tiket.findUnique({ where: { id: tiketBaruId } });
             if (tiket.stok < selisih) throw new Error('Stok tiket tidak cukup');
             await tx.tiket.update({
-              where: { id: usedTiketId },
+              where: { id: tiketBaruId },
               data: { stok: { decrement: selisih } },
             });
           } else if (selisih < 0) {
             await tx.tiket.update({
-              where: { id: usedTiketId },
+              where: { id: tiketBaruId },
               data: { stok: { increment: -selisih } },
             });
           }
         }
 
+        const tiketBaru = await tx.tiket.findUnique({ where: { id: tiketBaruId } });
+        if (!tiketBaru) throw new Error('Tiket tidak ditemukan');
+        const totalBaru = jumlahBaru * tiketBaru.harga;
+
         const updateData = {};
-        if (userId) updateData.userId = Number(userId);
-        if (tiketId) updateData.tiketId = Number(tiketId);
-        if (jumlah) updateData.jumlah = Number(jumlah);
-        if (status) updateData.status = status;
-        if (total) updateData.total = Number(total);
+        if (userId !== undefined) updateData.userId = Number(userId);
+        if (tiketId !== undefined) updateData.tiketId = tiketBaruId;
+        if (jumlah !== undefined) updateData.jumlah = jumlahBaru;
+        if (status !== undefined) updateData.status = status;
+        updateData.total = totalBaru;
 
         return tx.order.update({
           where: { id: Number(id) },

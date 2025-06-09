@@ -19,8 +19,9 @@ Get all users
   {
     "id": 1,
     "username": "john_doe",
-    "email": "john@example.com"
-    "password: "$2b$10$0QDcf1e.Bn9fqgF5QOM6zOWYWKQJ8yGMa5SZfet70npN8l3.Pr11K"
+    "email": "john@example.com",
+    "password": "$2b$10$0QDcf1e.Bn9fqgF5QOM6zOWYWKQJ8yGMa5SZfet70npN8l3.Pr11K",
+    "role": "admin"
   }
 ]
 ```
@@ -32,8 +33,9 @@ Get user by ID
 {
   "id": 1,
   "username": "john_doe",
-  "email": "john@example.com"
-  "password: "$2b$10$0QDcf1e.Bn9fqgF5QOM6zOWYWKQJ8yGMa5SZfet70npN8l3.Pr11K"
+  "email": "john@example.com",
+  "password": "$2b$10$0QDcf1e.Bn9fqgF5QOM6zOWYWKQJ8yGMa5SZfet70npN8l3.Pr11K",
+  "role": "admin"
   }
 }
 ```
@@ -45,7 +47,8 @@ Create new user
 {
   "username": "john_doe",
   "email": "john@example.com",
-  "password": "secure123"
+  "password": "secure123",
+  "role": "user"
 }
 ```
 
@@ -57,7 +60,8 @@ Update user by ID
   "id": 1,
   "username": "john_updated",
   "email": "john_updated@example.com",
-  "password": "newsecure123"
+  "password": "newsecure123",
+  "role": "admin"
 }
 ```
 
@@ -136,7 +140,9 @@ Get all orders
     "userId": 1,
     "tiketId": 2,
     "jumlah": 3,
-    "createdAt": "2025-06-07T09:00:00.000Z"
+    "createdAt": "2025-06-07T09:00:00.000Z",
+    "status": "pending",
+    "total": 500000
   }
 ]
 ```
@@ -151,7 +157,9 @@ Get order by ID
     "userId": 1,
     "tiketId": 2,
     "jumlah": 3,
-    "createdAt": "2025-06-07T09:00:00.000Z"
+    "createdAt": "2025-06-07T09:00:00.000Z",
+    "status": "pending",
+    "total": 500000
   }
 ]
 ```
@@ -194,8 +202,8 @@ Get all payments
   {
     "id": 1,
     "orderId": 1,
-    "status": "sukses",
-    "metode": "credit card",
+    "status": "paid",
+    "metode": "transfer",
     "total": 600000
   }
 ]
@@ -208,8 +216,8 @@ Get payment by ID
   {
     "id": 1,
     "orderId": 1,
-    "status": "sukses",
-    "metode": "credit card",
+    "status": "paid",
+    "metode": "transfer",
     "total": 600000
   }
 ]
@@ -235,6 +243,7 @@ Get all rewards
   {
     "id": 1,
     "userId": 1,
+    "orderId": 1,
     "poin": 100
   }
 ]
@@ -247,6 +256,7 @@ Get reward by ID
   {
     "id": 1,
     "userId": 1,
+    "orderId": 1,
     "poin": 100
   }
 ]
@@ -258,7 +268,7 @@ Create new reward
 ```json
 {
   "userId": 1,
-  "poin": 50
+  "orderId": 1
 }
 ```
 
@@ -269,7 +279,7 @@ Update reward by ID
 {
   "id": 1,
   "userId": 1,
-  "poin": 150
+  "orderId": 1
 }
 ```
 

@@ -25,8 +25,8 @@ exports.getUserById = async (req, res) => {
 // Create new user
 exports.createUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body
-    const user = await prisma.user.create({ data: { username, email, password } })
+    const { username, email, password, role } = req.body
+    const user = await prisma.user.create({ data: { username, email, password, role } })
     res.status(201).json(user)
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -43,6 +43,7 @@ exports.updateUser = async (req, res) => {
       if (username !== undefined) dataToUpdate.username = username;
       if (email !== undefined) dataToUpdate.email = email;
       if (password !== undefined) dataToUpdate.password = password;
+      if (role !== undefined) dataToUpdate.role = role;
     
     const updatedUser = await prisma.user.update({
       where: { id },
