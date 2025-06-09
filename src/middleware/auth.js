@@ -51,4 +51,16 @@ function authMiddleware(req, res, next) {
   }
 }
 
-module.exports = authMiddleware;
+// Middleware untuk mengecek role admin
+function checkAdminMiddleware(req, res, next) {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ message: "Akses ditolak. Hanya admin yang diizinkan." });
+  }
+}
+
+module.exports = {
+  authMiddleware,
+  checkAdminMiddleware
+};

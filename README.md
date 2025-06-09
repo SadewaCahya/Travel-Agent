@@ -4,7 +4,7 @@
 ## Base URL
 
 ```
-http://localhost:3000/{resource}
+http://localhost:4000/{resource}
 ```
 
 ---
