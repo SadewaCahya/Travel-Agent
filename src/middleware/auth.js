@@ -25,7 +25,12 @@ exports.login = async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { id: user.id, email: user.email, username: user.username },
+      { 
+        id: user.id, 
+        email: user.email, 
+        username: user.username,
+        role: user.role
+      },
       JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -51,4 +56,16 @@ function authMiddleware(req, res, next) {
   }
 }
 
-module.exports = authMiddleware;
+// Middleware untuk mengecek role admin
+function checkAdminMiddleware(req, res, next) {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ message: "Akses ditolak. Hanya admin yang diizinkan." });
+  }
+}
+
+module.exports = {
+  authMiddleware,
+  checkAdminMiddleware
+};

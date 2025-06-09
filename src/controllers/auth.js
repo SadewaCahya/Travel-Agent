@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -25,7 +24,7 @@ const login = async (req, res) => {
 			jwt.sign(
 				{
 					email: user.email,
-					isAdmin: user.isAdmin,
+					role: user.role,
 				},
 				JWT_SECRET,
 				{ expiresIn: 60 * 60 },
@@ -49,34 +48,41 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-	const { email, password, nama, alamat, noTelp } = req.body;
+	const { username, email, password } = req.body;
 	try {
+		// Check if user already exists
 		const checkUser = await prisma.user.findFirst({
 			where: {
-				email,
+				OR: [
+					{ email },
+					{ username }
+				]
 			},
 		});
-		if (checkUser != null) {
+		
+		if (checkUser) {
 			return res.status(400).json({
-				message: "Register gagal",
+				message: "Username atau email sudah terdaftar",
 			});
 		}
+
+		// Create new user
 		const user = await prisma.user.create({
 			data: {
+				username,
 				email,
 				password: await hashPassword(password),
-				nama,
-				alamat,
-				noTelp,
+				role: "user" // Default role
 			},
 			select: {
-				nama: true,
-				alamat: true,
-				noTelp: true,
+				id: true,
+				username: true,
 				email: true,
+				role: true
 			},
 		});
-		res.status(200).json({
+
+		res.status(201).json({
 			message: "Register berhasil",
 			user,
 		});
